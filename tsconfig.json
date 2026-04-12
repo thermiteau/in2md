@@ -1,0 +1,35 @@
+{
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "allowImportingTsExtensions": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "noEmit": true,
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "types": ["node", "chrome", "vitest/globals"],
+    "useDefineForClassFields": true,
+    "outDir": "./dist",
+    "skipLibCheck": true,
+    "target": "ES2022",
+    "strict": false,
+    "incremental": true,
+    "resolveJsonModule": true,
+    "forceConsistentCasingInFileNames": true,
+    "strictNullChecks": true,
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "baseUrl": ".",
+    "ignoreDeprecations": "6.0"
+  },
+  "include": [
+    "src/**/*.ts",
+    "tests/**/*.test.ts",
+    "tests/**/*.ts",
+    "types/**/*.d.ts",
+    "scripts/**/*.ts"
+  ],
+  "exclude": ["node_modules", "dist", "build", "eslint.config.mjs","examples/**/*"]
+}

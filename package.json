@@ -1,0 +1,71 @@
+{
+  "name": "in2md",
+  "version": "2.0.8",
+  "description": "Firefox extension for extracting and managing LinkedIn content — post extraction, user details, comment export, and feed management.",
+  "homepage": "https://github.com/thermiteau/in2md",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/thermiteau/in2md"
+  },
+  "license": "UNLICENSED",
+  "author": "Thermite Team",
+  "main": "src/manifest.json",
+  "scripts": {
+    "build": "npm run build:ts && npm run build:ext",
+    "build:ext": "web-ext build --source-dir=build --artifacts-dir=dist --overwrite-dest",
+    "build:ts": "node scripts/build.mjs",
+    "eslint": "eslint --config eslint.config.mjs --cache-location node_modules/.cache/eslint --quiet --fix \"./{src,scripts,tests}/**/*.{ts,tsx}\" ",
+    "lint": "npm run lint:ts && npm run lint:ext",
+    "lint:ext": "web-ext lint --source-dir=build",
+    "lint:ts": "pnpm run eslint && pnpm run pretty",
+    "pretty": "prettier --write \"./{src,scripts, tests}/**/*.ts\"",
+    "start": "npm run build:ts && web-ext run --source-dir=build",
+    "test:auth": "./scripts/auth-linkedin.sh",
+    "test:e2e": "npx playwright test --project=extension",
+    "test:unit": "vitest run",
+    "test:unit:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "prettier": {
+    "printWidth": 120,
+    "semi": false,
+    "singleQuote": true,
+    "tabWidth": 2,
+    "trailingComma": "all",
+    "useTabs": false
+  },
+  "dependencies": {
+    "dayjs": "^1.11.20",
+    "lodash": "^4.18.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.59.1",
+    "@stylistic/eslint-plugin": "^5.10.0",
+    "@types/chrome": "^0.1.39",
+    "@types/lodash": "^4.17.24",
+    "@types/node": "^25.5.2",
+    "@vitest/coverage-v8": "^4.1.4",
+    "@vitest/eslint-plugin": "^1.6.14",
+    "esbuild": "^0.28.0",
+    "esbuild-register": "^3.6.0",
+    "eslint": "^10.2.0",
+    "eslint-config-next": "^16.2.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-import-resolver-typescript": "^4.4.4",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-unicorn": "^64.0.0",
+    "globals": "^17.4.0",
+    "happy-dom": "^20.8.9",
+    "prettier": "^3.8.1",
+    "typescript": "^6.0.2",
+    "typescript-eslint": "^8.58.0",
+    "vitest": "^4.1.4",
+    "web-ext": "^10.1.0"
+  },
+  "engines": {
+    "firefox": ">=109.0"
+  }
+}
