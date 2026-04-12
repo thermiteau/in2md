@@ -11,20 +11,24 @@ A Firefox extension (Manifest V3) that adds productivity tools to LinkedIn -- ex
 
 See [docs/overview.md](docs/overview.md) for detailed feature documentation with screenshots.
 
-## Requirements
+## Building from Source
 
-- Firefox 112+
-- Node.js / pnpm
+### Prerequisites
 
-## Getting Started
+- Node.js >= 22 (tested with 22.22.0)
+- pnpm >= 10 (tested with 10.14.0)
+- Any OS (tested on macOS and Ubuntu 24.04)
+
+### Steps
 
 ```bash
 pnpm install
-make build        # TypeScript -> esbuild -> web-ext zip
-make start        # Build + launch Firefox with the extension loaded
+pnpm run build
 ```
 
-The built extension is output to `dist/in2md-<version>.zip`.
+This runs esbuild to compile TypeScript from `src/` into `build/`, then packages it with web-ext into `dist/in2md-<version>.zip`.
+
+The output zip in `dist/` is the installable extension. The build is deterministic — running the above commands on the same source should produce identical output.
 
 ## Development
 

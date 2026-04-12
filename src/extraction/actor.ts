@@ -6,9 +6,9 @@ const EXTRACT_USER_BUTTON_ATTR = 'data-la-extract'
 const USER_BUTTON_TEXT = 'Get User'
 
 // LinkedIn uses different aria-label formats on the actor info div:
-// - "Name ProfileType Profile Distance" (e.g. "David Cheal Premium Profile 2nd")
-// - "Name, Open to work  Distance" (e.g. "David Cheal, Open to work  3rd+")
-// - "Name  Distance" (e.g. "David Cheal  3rd+") — no profile type at all
+// - "Name ProfileType Profile Distance" (e.g. "Jane Smith Premium Profile 2nd")
+// - "Name, Open to work  Distance" (e.g. "Jane Smith, Open to work  3rd+")
+// - "Name  Distance" (e.g. "Jane Smith  3rd+") — no profile type at all
 export const ACTOR_INFO_SELECTOR =
   '[aria-label*="Profile"], [aria-label*="Open to work"], [aria-label*="1st"], [aria-label*="2nd"], [aria-label*="3rd"]'
 

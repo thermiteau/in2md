@@ -8,10 +8,10 @@ import {
 describe("parseActorAriaLabel", () => {
   it("parses standard format with profile type and distance", () => {
     const result = parseActorAriaLabel({
-      label: "Robin Oldham Premium Profile 2nd",
+      label: "Alex Morgan Premium Profile 2nd",
     });
     expect(result).toEqual({
-      name: "Robin Oldham",
+      name: "Alex Morgan",
       profileType: "Premium",
       connectionDistance: "2nd",
     });
@@ -48,10 +48,10 @@ describe("parseActorAriaLabel", () => {
 
   it("parses Open to work format", () => {
     const result = parseActorAriaLabel({
-      label: "Ubaid Ur Rehman, Open to work  3rd+",
+      label: "Sam Al Rashid, Open to work  3rd+",
     });
     expect(result).toEqual({
-      name: "Ubaid Ur Rehman",
+      name: "Sam Al Rashid",
       profileType: "Open to work",
       connectionDistance: "3rd+",
     });
@@ -67,9 +67,9 @@ describe("parseActorAriaLabel", () => {
   });
 
   it("parses bare format with distance only", () => {
-    const result = parseActorAriaLabel({ label: "Khalid Ali  3rd+" });
+    const result = parseActorAriaLabel({ label: "Pat Chen  3rd+" });
     expect(result).toEqual({
-      name: "Khalid Ali",
+      name: "Pat Chen",
       profileType: null,
       connectionDistance: "3rd+",
     });
