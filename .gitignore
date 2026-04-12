@@ -5,4 +5,4 @@ node_modules
 tests/.auth/
 test-results/
 playwright-report/
-.playwright-mcp
+.playwright-mcp/
