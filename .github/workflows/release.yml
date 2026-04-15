@@ -1,0 +1,183 @@
+name: Release Firefox extension to AMO
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: 'Version bump'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+          - none
+      channel:
+        description: 'AMO channel (listed = public store, unlisted = self-hosted signed)'
+        required: true
+        default: 'listed'
+        type: choice
+        options:
+          - listed
+          - unlisted
+      chrome_publish:
+        description: 'Also publish to Chrome Web Store'
+        required: true
+        default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+      chrome_target:
+        description: 'Chrome Web Store publish target'
+        required: true
+        default: 'default'
+        type: choice
+        options:
+          - default
+          - trustedTesters
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      BUMP: ${{ github.event.inputs.bump }}
+      CHANNEL: ${{ github.event.inputs.channel }}
+      CHROME_PUBLISH: ${{ github.event.inputs.chrome_publish }}
+      CHROME_TARGET: ${{ github.event.inputs.chrome_target }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Bump version
+        id: version
+        run: |
+          if [ "$BUMP" != "none" ]; then
+            ./scripts/bump-version.sh "$BUMP"
+          fi
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Releasing version $VERSION"
+
+      - name: Verify package.json and manifest.base.json agree
+        run: |
+          PKG=$(node -p "require('./package.json').version")
+          MANIFEST=$(node -p "require('./src/manifest.base.json').version")
+          if [ "$PKG" != "$MANIFEST" ]; then
+            echo "::error::Version mismatch: package.json=$PKG manifest.base.json=$MANIFEST"
+            exit 1
+          fi
+
+      - name: Typecheck
+        run: pnpm run typecheck
+
+      - name: Lint
+        run: pnpm run lint
+
+      - name: Build Firefox extension
+        run: pnpm run build:firefox
+
+      - name: Build Chrome extension
+        run: pnpm run build:chrome
+
+      - name: Package source code for AMO review
+        run: |
+          mkdir -p dist
+          zip -r dist/in2md-source.zip \
+            src \
+            scripts \
+            package.json \
+            pnpm-lock.yaml \
+            tsconfig.json \
+            eslint.config.mjs \
+            Makefile \
+            README.md \
+            -x '*/node_modules/*' '*/.DS_Store' 'build/*' 'dist/*'
+
+      - name: Locate built artifacts
+        id: artifacts
+        run: |
+          XPI=$(ls dist/*.zip | grep -v source | grep -v chrome | head -n 1)
+          CHROME_ZIP=$(ls dist/*-chrome.zip | head -n 1)
+          echo "xpi=$XPI" >> "$GITHUB_OUTPUT"
+          echo "chrome=$CHROME_ZIP" >> "$GITHUB_OUTPUT"
+          echo "Firefox: $XPI"
+          echo "Chrome: $CHROME_ZIP"
+
+      - name: Sign and submit to AMO
+        env:
+          WEB_EXT_API_KEY: ${{ secrets.AMO_JWT_ISSUER }}
+          WEB_EXT_API_SECRET: ${{ secrets.AMO_JWT_SECRET }}
+        run: |
+          pnpm exec web-ext sign \
+            --source-dir=build/firefox \
+            --artifacts-dir=dist/signed \
+            --channel="$CHANNEL" \
+            --upload-source-code=dist/in2md-source.zip
+
+      - name: Upload and publish to Chrome Web Store
+        if: env.CHROME_PUBLISH == 'true'
+        env:
+          CWS_EXTENSION_ID: ${{ secrets.CWS_EXTENSION_ID }}
+          CWS_CLIENT_ID: ${{ secrets.CWS_CLIENT_ID }}
+          CWS_CLIENT_SECRET: ${{ secrets.CWS_CLIENT_SECRET }}
+          CWS_REFRESH_TOKEN: ${{ secrets.CWS_REFRESH_TOKEN }}
+          CHROME_ZIP: ${{ steps.artifacts.outputs.chrome }}
+        run: |
+          npx --yes chrome-webstore-upload-cli@3 upload \
+            --source "$CHROME_ZIP" \
+            --extension-id "$CWS_EXTENSION_ID" \
+            --client-id "$CWS_CLIENT_ID" \
+            --client-secret "$CWS_CLIENT_SECRET" \
+            --refresh-token "$CWS_REFRESH_TOKEN" \
+            --auto-publish \
+            --target "$CHROME_TARGET"
+
+      - name: Commit, tag, and push
+        if: env.BUMP != 'none'
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          git add package.json src/manifest.base.json
+          git commit -m "Release v$VERSION"
+          git tag "v$VERSION"
+          git push origin HEAD
+          git push origin "v$VERSION"
+
+      - name: Create GitHub Release
+        if: env.BUMP != 'none'
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: v${{ steps.version.outputs.version }}
+          files: |
+            ${{ steps.artifacts.outputs.xpi }}
+            ${{ steps.artifacts.outputs.chrome }}
+            dist/signed/*.xpi
+            dist/in2md-source.zip
+          generate_release_notes: true

@@ -1,11 +1,17 @@
+SHELL := $(shell command -v bash)
+.ONESHELL:
+
 .PHONY: build build-firefox build-chrome start test test-unit test-auth lint typecheck clean bump-patch bump-minor bump-major iterate
 
--include $(HOME)/.bash_secrets_exports
--include $(HOME)/.zsh_secrets_exports
+
+# Note: do NOT -include $(HOME)/.bash_secrets_exports or .zsh_secrets_exports —
+# those are shell-syntax files. Make would parse $PATH as $P (empty) + ATH,
+# corrupting PATH and breaking child processes. Environment is inherited from
+# the invoking shell automatically.
 
 # Add nvm's current node bin dir to PATH so make can find pnpm/node
 NVM_BIN := $(shell ls -td $(HOME)/.nvm/versions/node/*/bin 2>/dev/null | head -n1)
-export PATH := $(NVM_BIN):$(PATH)
+export PATH := $(NVM_BIN):$(HOME)/.local/bin:$(PATH)
 
 # Firefox Developer Edition binary (override with FIREFOX_BIN=/path make start)
 export FIREFOX_BIN ?= $(HOME)/Downloads/firefox/firefox
@@ -15,16 +21,16 @@ export DISPLAY ?= :0
 
 export
 
-build:
-	@set -e
-	pnpm run build || speaky "Build failed"
-	speaky "Build complete"
+build: build-firefox build-chrome
+	@speaky "Build complete"
+
 build-firefox:
 	@set -e
-	pnpm run build:firefox
+	pnpm run build:firefox </dev/null || { speaky "Firefox build failed"; exit 1; }
+
 build-chrome:
 	@set -e
-	pnpm run build:chrome
+	pnpm run build:chrome </dev/null || { speaky "Chrome build failed"; exit 1; }
 start:
 	pnpm run start
 
@@ -45,19 +51,8 @@ typecheck:
 
 lint:
 	@set -e
-	pnpm run lint || @speaky "Linting failed"
-	@speaky "Linting complete
+	pnpm run lint || speaky "Linting failed"
+	@speaky "Linting complete"
 
 clean:
 	rm -rf dist build
-
-bump-patch:
-	@./scripts/bump-version.sh patch
-
-bump-minor:
-	@./scripts/bump-version.sh minor
-
-bump-major:
-	@./scripts/bump-version.sh major
-
-iterate: bump-patch clean build
