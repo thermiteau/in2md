@@ -227,12 +227,27 @@ export const createExtractCommentsButton = (params: { container: Element }): HTM
       return
     }
 
-    // Comments not expanded — click the comment count button to load them
-    const countBtn = container.querySelector<HTMLButtonElement>(
+    // Comments not expanded — click the comment count trigger to load them.
+    // Classic DOM: <button aria-label="N comments on X's post">.
+    // Obfuscated feed DOM: <div role="button"> containing <span>N comments</span>.
+    let countTrigger: HTMLElement | null = container.querySelector<HTMLButtonElement>(
       'button[aria-label*="comment"][aria-label$=" post"]',
     )
 
-    if (!countBtn) {
+    if (!countTrigger) {
+      const roleButtons = container.querySelectorAll<HTMLElement>('div[role="button"]')
+
+      for (const candidate of roleButtons) {
+        const text = candidate.querySelector('span')?.textContent?.trim() || ''
+
+        if (/^\d+ comments?$/.test(text)) {
+          countTrigger = candidate
+          break
+        }
+      }
+    }
+
+    if (!countTrigger) {
       btn.textContent = 'No comments'
       setTimeout(() => {
         btn.textContent = COMMENTS_BUTTON_TEXT
@@ -241,7 +256,7 @@ export const createExtractCommentsButton = (params: { container: Element }): HTM
     }
 
     btn.textContent = '...'
-    countBtn.click()
+    countTrigger.click()
 
     // Poll for comments to appear in the DOM rather than using a fixed delay.
     let attempts = 0

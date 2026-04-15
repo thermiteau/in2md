@@ -11,15 +11,16 @@
   "author": "Thermite Team",
   "main": "src/manifest.json",
   "scripts": {
-    "build": "pnpm run build:ts && pnpm run build:ext",
-    "build:ext": "web-ext build --source-dir=build --artifacts-dir=dist --overwrite-dest",
+    "build": "pnpm run build:firefox && pnpm run build:chrome",
+    "build:firefox": "TARGET=firefox node scripts/build.mjs && web-ext build --source-dir=build/firefox --artifacts-dir=dist --overwrite-dest",
+    "build:chrome": "TARGET=chrome node scripts/build.mjs && node scripts/zip-chrome.mjs",
     "build:ts": "node scripts/build.mjs",
     "eslint": "eslint --config eslint.config.mjs --cache-location node_modules/.cache/eslint --quiet --fix \"./{src,scripts,tests}/**/*.{ts,tsx}\" ",
     "lint": "pnpm run lint:ts && pnpm run lint:ext",
-    "lint:ext": "web-ext lint --source-dir=build",
+    "lint:ext": "web-ext lint --source-dir=build/firefox",
     "lint:ts": "pnpm run eslint && pnpm run pretty",
     "pretty": "prettier --write \"./{src,scripts, tests}/**/*.ts\"",
-    "start": "pnpm run build:ts && web-ext run --source-dir=build",
+    "start": "TARGET=firefox node scripts/build.mjs && pnpm exec web-ext run --source-dir=build/firefox --firefox=\"${FIREFOX_BIN:-/home/developer/Downloads/firefox/firefox}\"",
     "test:auth": "./scripts/auth-linkedin.sh",
     "test:e2e": "npx playwright test --project=extension",
     "test:unit": "vitest run",
@@ -67,5 +68,6 @@
   },
   "engines": {
     "firefox": ">=109.0"
-  }
+  },
+  "packageManager": "pnpm@10.32.1+sha512.a706938f0e89ac1456b6563eab4edf1d1faf3368d1191fc5c59790e96dc918e4456ab2e67d613de1043d2e8c81f87303e6b40d4ffeca9df15ef1ad567348f2be"
 }

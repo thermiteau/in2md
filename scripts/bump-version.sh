@@ -8,7 +8,7 @@ set -euo pipefail
 PART="${1:-patch}"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 PKG="$ROOT/package.json"
-MANIFEST="$ROOT/src/manifest.json"
+MANIFEST="$ROOT/src/manifest.base.json"
 
 # Read current version from package.json
 CURRENT=$(node -p "require('$PKG').version")

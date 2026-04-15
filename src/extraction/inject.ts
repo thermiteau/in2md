@@ -154,6 +154,27 @@ const injectExtractButtons = () => {
     const btn = createExtractCommentsButton({ container: parent })
     commentList.insertAdjacentElement('beforebegin', btn)
   }
+
+  // 3. Obfuscated feed DOM — the "N comments" count is a div[role="button"]
+  //    containing a span with visible text like "22 comments". No aria-label,
+  //    no classic .comments-* classes. Match on the visible text instead.
+  const roleButtons = document.querySelectorAll<HTMLElement>('div[role="button"]')
+
+  for (const candidate of roleButtons) {
+    const span = candidate.querySelector('span')
+    const text = span?.textContent?.trim() || ''
+
+    if (!/^\d+ comments?$/.test(text)) continue
+
+    const postContainer = findPostContainer({ element: candidate })
+
+    if (!postContainer) continue
+
+    if (postContainer.querySelector(`[${EXTRACT_COMMENTS_BUTTON_ATTR}]`)) continue
+
+    const btn = createExtractCommentsButton({ container: postContainer })
+    candidate.insertAdjacentElement('afterend', btn)
+  }
 }
 
 export const startObservingFeed = (): MutationObserver => {
