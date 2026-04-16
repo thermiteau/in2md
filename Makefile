@@ -1,7 +1,7 @@
 SHELL := $(shell command -v bash)
 .ONESHELL:
 
-.PHONY: build build-firefox build-chrome start test test-unit test-auth lint typecheck clean bump-patch bump-minor bump-major iterate
+.PHONY: build build-firefox build-chrome start test test-unit test-auth lint lint-ts lint-ext typecheck clean bump-patch bump-minor bump-major iterate
 
 
 # Note: do NOT -include $(HOME)/.bash_secrets_exports or .zsh_secrets_exports —
@@ -49,10 +49,16 @@ test-auth:
 typecheck:
 	pnpm run typecheck
 
-lint:
-	@set -e
-	pnpm run lint || speaky "Linting failed"
+lint: lint-ts build-firefox lint-ext
 	@speaky "Linting complete"
+
+lint-ts:
+	@set -e
+	pnpm run lint:ts || { speaky "TypeScript lint failed"; exit 1; }
+
+lint-ext:
+	@set -e
+	pnpm run lint:ext || { speaky "web-ext lint failed"; exit 1; }
 
 clean:
 	rm -rf dist build

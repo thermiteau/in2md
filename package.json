@@ -16,7 +16,6 @@
     "build:chrome": "TARGET=chrome node scripts/build.mjs && node scripts/zip-chrome.mjs",
     "build:ts": "node scripts/build.mjs",
     "eslint": "eslint --config eslint.config.mjs --cache-location node_modules/.cache/eslint --quiet --fix \"./{src,scripts,tests}/**/*.{ts,tsx}\" ",
-    "lint": "pnpm run lint:ts && pnpm run lint:ext",
     "lint:ext": "web-ext lint --source-dir=build/firefox",
     "lint:ts": "pnpm run eslint && pnpm run pretty",
     "pretty": "prettier --write \"./{src,scripts, tests}/**/*.ts\"",

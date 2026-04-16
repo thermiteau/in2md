@@ -94,14 +94,17 @@ jobs:
       - name: Typecheck
         run: pnpm run typecheck
 
-      - name: Lint
-        run: pnpm run lint
+      - name: Lint TypeScript
+        run: pnpm run lint:ts
 
       - name: Build Firefox extension
         run: pnpm run build:firefox
 
       - name: Build Chrome extension
         run: pnpm run build:chrome
+
+      - name: Lint built Firefox extension (web-ext)
+        run: pnpm run lint:ext
 
       - name: Package source code for AMO review
         run: |
