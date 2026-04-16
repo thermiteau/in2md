@@ -41,6 +41,7 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    environment: 'prd'
     permissions:
       contents: write
     env:
