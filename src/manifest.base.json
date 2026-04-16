@@ -10,13 +10,22 @@
   "author": "Thermite Team",
   "content_scripts": [
     {
-      "js": ["inject-autorefresh-blocker.js"],
-      "matches": ["https://www.linkedin.com/*"],
+      "js": [
+        "inject-autorefresh-blocker.js"
+      ],
+      "matches": [
+        "https://www.linkedin.com/*"
+      ],
       "run_at": "document_start"
     },
     {
-      "js": ["scraper.js", "extract.js"],
-      "matches": ["https://www.linkedin.com/*"],
+      "js": [
+        "scraper.js",
+        "extract.js"
+      ],
+      "matches": [
+        "https://www.linkedin.com/*"
+      ],
       "run_at": "document_end"
     }
   ],
@@ -28,12 +37,19 @@
   },
   "manifest_version": 3,
   "name": "in2md",
-  "permissions": ["activeTab", "clipboardWrite"],
-  "version": "2.0.8",
+  "permissions": [
+    "activeTab",
+    "clipboardWrite"
+  ],
+  "version": "2.1.0",
   "web_accessible_resources": [
     {
-      "matches": ["https://www.linkedin.com/*"],
-      "resources": ["block-autorefresh.js"]
+      "matches": [
+        "https://www.linkedin.com/*"
+      ],
+      "resources": [
+        "block-autorefresh.js"
+      ]
     }
   ]
 }
